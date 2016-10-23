@@ -41,8 +41,8 @@ public class FileShareServer implements Runnable {
         System.out.println("start");
         //startcomication
         ServerCommunicator com = new ServerCommunicator(out,in);
-        com.startComucateWithConsumer();
-
+        com.startCommucateWithConsumer();
+        closeStreams();
         scanner.close();
         try {
             socket.close();
@@ -50,5 +50,15 @@ public class FileShareServer implements Runnable {
             e.printStackTrace();
         }
 
+    }
+
+    private void closeStreams(){
+        try {
+            out.close();
+            in.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
