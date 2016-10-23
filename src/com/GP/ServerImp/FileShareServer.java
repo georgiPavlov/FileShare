@@ -10,8 +10,8 @@ import java.util.Scanner;
 public class FileShareServer implements Runnable {
    private Socket socket;
     private Scanner scanner;
-    private BufferedWriter out;
-    private  BufferedReader in;
+    private DataOutputStream out;
+    private  DataInputStream in;
 
 
     public FileShareServer(Socket socket){
@@ -23,11 +23,11 @@ public class FileShareServer implements Runnable {
         }
         try {
              in =
-                    new BufferedReader(
-                            new InputStreamReader(socket.getInputStream()));
+                    new DataInputStream(
+                           socket.getInputStream());
              out =
-                    new BufferedWriter(
-                            new OutputStreamWriter(socket.getOutputStream()));
+                    new DataOutputStream(
+                            socket.getOutputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,9 +39,12 @@ public class FileShareServer implements Runnable {
     @Override
     public void run() {
         System.out.println("start");
-        //startcomication
         ServerCommunicator com = new ServerCommunicator(out,in);
-        com.startCommucateWithConsumer();
+        try {
+            com.startCommucateWithConsumer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         closeStreams();
         scanner.close();
         try {

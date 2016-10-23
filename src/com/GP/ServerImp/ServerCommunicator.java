@@ -1,27 +1,44 @@
 package com.GP.ServerImp;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Created by user on 10/23/16.
  */
 public class ServerCommunicator {
-    private BufferedWriter out;
-    private BufferedReader in;
+    private DataOutputStream out;
+    private  DataInputStream in;
 
-    public ServerCommunicator(BufferedWriter out, BufferedReader in) {
+    public ServerCommunicator(DataOutputStream out, DataInputStream in) {
         this.out = out;
         this.in = in;
     }
 
-    public void  startCommucateWithConsumer(){
+    public void  startCommucateWithConsumer() throws IOException {
+
+        File file = new File("/home/user/FileShare/files/videos/The.Flash.2014.S03E02.XviD-AFG.avi");
+        FileInputStream fis = null;
         try {
-            out.write("the server is here , no money honey");
+            fis = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+          try {
+            out.writeUTF(file.getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        int count = 0;
+        byte[] b = new byte[1000];
+        System.out.println("Uploading File...");
+        while ((count = fis.read(b)) != -1) {
+            out.write(b, 0, count);
+        }
+        System.out.println("upload finished");
+
+
+
 
     }
 
