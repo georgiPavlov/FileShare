@@ -1,11 +1,14 @@
 package com.GP.ServerImp;
 
+import com.GP.JDBS_implementator.FileEntry;
 import com.GP.JDBS_implementator.JDBC_ImplementatorExecutor;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,7 +111,12 @@ public class ServerCommunicator implements IServerCommunicator{
             e.printStackTrace();
         }
         if(isLoginOK){
+            sendTrueForOK();
+            sendToClientIfIsAdmin();
+            sendEntriesToClientAPP();
             isAdmin = jdbc.isAdmin(user);
+        }else {
+            sendFalseForNOT_OK();
         }
         isLoginSuccessful = isLoginOK;
         return isLoginOK;
@@ -138,6 +146,7 @@ public class ServerCommunicator implements IServerCommunicator{
                     fos.write(b, 0, count);
                 }
                 LOGGER.log(Level.FINE, "file is written");
+                sendTrueForOK();
                 fos.close();
                 jdbc.commitToDB(category , textPath ,USER );
                 System.out.println("fos closed");
@@ -148,6 +157,7 @@ public class ServerCommunicator implements IServerCommunicator{
             //custom unlock
 
         }
+        sendFalseForNOT_OK();
         return false;
     }
 
@@ -178,7 +188,7 @@ public class ServerCommunicator implements IServerCommunicator{
                 }
                 LOGGER.log(Level.FINE, "upload finished");
                 System.out.println("upload finished");
-
+                sendTrueForOK();
                 fis.close();
                 //unlock writer
                 return true;
@@ -188,6 +198,7 @@ public class ServerCommunicator implements IServerCommunicator{
             return false;
         }
         LOGGER.log(Level.FINE , "file is not in the db!");
+        sendFalseForNOT_OK();
         return false;
     }
 
@@ -215,9 +226,58 @@ public class ServerCommunicator implements IServerCommunicator{
             e.printStackTrace();
         }
         LOGGER.log(Level.FINE , "the file with path: " + textPath +  " is deleted");
-        return true;
+            sendTrueForOK();
+            return true;
         }
         //unlock
+        sendFalseForNOT_OK();
         return false;
+    }
+
+    @Override
+    public void sendEntriesToClientAPP() {
+        ArrayList<FileEntry> entries = jdbc.getTheFileList();
+        if(entries.isEmpty()){
+            //some custom exception maybe
+            sendFalseForNOT_OK();
+            return;
+        }else {
+            for (int i = 0; i < entries.size(); i++) {
+                try {
+                    out.writeUTF(entries.get(i).getCategorie());
+                    out.writeUTF(entries.get(i).getName());
+                    out.writeUTF(entries.get(i).getPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+    }
+
+    @Override
+    public void sendToClientIfIsAdmin() {
+        try {
+            out.writeBoolean(isAdmin);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendTrueForOK(){
+        try {
+            out.writeBoolean(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendFalseForNOT_OK(){
+        try {
+            out.writeBoolean(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

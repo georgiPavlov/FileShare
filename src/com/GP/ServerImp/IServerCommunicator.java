@@ -9,6 +9,8 @@ public interface IServerCommunicator {
     boolean sendFileToClient();
     boolean deleteFromAdmin();
     boolean deleteFromAdmin(String textPath);
+    void sendEntriesToClientAPP();
+    void sendToClientIfIsAdmin();
 
 
 }
