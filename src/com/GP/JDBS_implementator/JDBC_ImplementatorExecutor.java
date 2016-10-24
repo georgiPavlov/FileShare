@@ -1,5 +1,9 @@
 package com.GP.JDBS_implementator;
 
+import com.mysql.jdbc.ResultSet;
+import com.mysql.jdbc.Statement;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -9,8 +13,18 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
 
 
     @Override
-    public boolean isAdmin() {
-        return false;
+    public boolean isAdmin(String user) {
+        Statement stmt = null;
+        boolean isAdminBool   = false;
+        try {
+            stmt = (Statement) conn.createStatement();
+            String sql1 = "select isAdmin from registration where user=" + user + ";";
+            ResultSet rs = (ResultSet) stmt.executeQuery(sql1);
+            isAdminBool = rs.getBoolean(4);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return isAdminBool;
     }
 
     @Override
@@ -19,8 +33,17 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
     }
 
     @Override
-    public boolean commitToDB() {
+    public boolean commitToDB(String category, String path) {
         return false;
     }
 
+    @Override
+    public boolean authenticatedUser(String user, String password) {
+        return false;
+    }
+
+    @Override
+    public boolean isInDB(String path) {
+        return false;
+    }
 }
