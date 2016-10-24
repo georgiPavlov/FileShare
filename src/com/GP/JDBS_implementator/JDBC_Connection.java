@@ -17,13 +17,26 @@ public class JDBC_Connection implements IJDBC_Connection{
     @Override
     public void createConnection() {
         try {
+            System.out.println("creating connection");
             Driver d = new com.mysql.jdbc.Driver();
             DriverManager.registerDriver(d);
             conn  = (com.mysql.jdbc.Connection) DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("connection is up");
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    @Override
+    public void destroyConnection() {
+        try {
+            System.out.println("connection is down");
+            conn.close();
+            System.out.println("bye bye have a nice day! :)");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

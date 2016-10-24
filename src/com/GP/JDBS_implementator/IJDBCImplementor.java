@@ -8,8 +8,10 @@ import java.util.ArrayList;
 public interface IJDBCImplementor {
     boolean isAdmin(String user);
     ArrayList<FileEntry> getTheFileList();
-    boolean commitToDB(String category ,String path );
+    boolean commitToDB(String category ,String path, String name );
     boolean authenticatedUser(String user,String password);
     boolean isInDB(String path);
+    boolean deleteToDB(String path , String user);
+    boolean categoryExists(String category);
 
 }

@@ -7,5 +7,6 @@ public interface IServerCommunicator {
     boolean loginAuthentication();
     boolean commitFromAdmin();
     boolean sendFileToClient();
+    boolean deleteFromAdmin();
 
 }

@@ -5,5 +5,6 @@ package com.GP.JDBS_implementator;
  */
 public interface IJDBC_Connection {
     void createConnection();
+    void destroyConnection();
 
 }
