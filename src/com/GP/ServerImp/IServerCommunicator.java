@@ -8,5 +8,7 @@ public interface IServerCommunicator {
     boolean commitFromAdmin();
     boolean sendFileToClient();
     boolean deleteFromAdmin();
+    boolean deleteFromAdmin(String textPath);
+
 
 }
