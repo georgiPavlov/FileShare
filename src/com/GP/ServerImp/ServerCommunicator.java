@@ -2,6 +2,8 @@ package com.GP.ServerImp;
 
 import com.GP.JDBS_implementator.FileEntry;
 import com.GP.JDBS_implementator.JDBC_ImplementatorExecutor;
+import com.GP.MultithreadImplementation.IThreadLock;
+import com.GP.MultithreadImplementation.ThreadLock;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
@@ -25,11 +27,13 @@ public class ServerCommunicator implements IServerCommunicator{
     private boolean isLoginSuccessful = false;
     private String USER;
     private   String PASSWORD;
+    private IThreadLock lock;
 
     public ServerCommunicator(DataOutputStream out, DataInputStream in) {
         this.out = out;
         this.in = in;
         this.jdbc = new JDBC_ImplementatorExecutor();
+        this.lock = new ThreadLock();
     }
 
     public void  startCommucateWithConsumer() throws IOException  {
@@ -126,9 +130,11 @@ public class ServerCommunicator implements IServerCommunicator{
     public boolean commitFromAdmin() { // String path , file data!
         if(isLoginSuccessful && isAdmin){
             //custom lock
+
             try {
                 String textPath = in.readUTF();
                 String category = in.readUTF();
+                lock.lockWriteFile(textPath);
 
                 File file = new File(textPath);
                 FileOutputStream fos = null;
@@ -150,10 +156,12 @@ public class ServerCommunicator implements IServerCommunicator{
                 fos.close();
                 jdbc.commitToDB(category , textPath ,USER );
                 System.out.println("fos closed");
+                lock.unlockWriteFile(textPath);
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             //custom unlock
 
         }
@@ -167,8 +175,10 @@ public class ServerCommunicator implements IServerCommunicator{
 
         try {
             path = in.readUTF();
+            lock.lockReadFile(path);
             if (jdbc.isInDB(path)) {
                 //lock writer
+
                 File file = new File(path);
                 FileInputStream fis = null;
                 try {
@@ -190,6 +200,7 @@ public class ServerCommunicator implements IServerCommunicator{
                 System.out.println("upload finished");
                 sendTrueForOK();
                 fis.close();
+                lock.unlockReadFile(path);
                 //unlock writer
                 return true;
             }
@@ -217,8 +228,10 @@ public class ServerCommunicator implements IServerCommunicator{
     @Override
     public boolean deleteFromAdmin(String textPath) {
         //lock
+        lock.lockWriteFile(textPath);
         if(jdbc.deleteToDB(textPath , USER)){
         Path path = Paths.get(textPath);
+
         try {
             Files.delete(path);
         } catch (IOException e) {
@@ -230,6 +243,7 @@ public class ServerCommunicator implements IServerCommunicator{
             return true;
         }
         //unlock
+        lock.unlockWriteFile(textPath);
         sendFalseForNOT_OK();
         return false;
     }
