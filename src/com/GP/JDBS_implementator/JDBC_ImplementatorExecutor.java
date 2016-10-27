@@ -126,12 +126,14 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
     public boolean deleteToDB(String path, String user) {
 
         if(isInDB(path) && isAdmin(user)){
+            System.out.println("starting deleting process #dataBase");
             Statement stmt ;
             try {
                 stmt = (Statement) conn.createStatement();
                 String sql1 = "DELETE FROM files " +
                         "WHERE path = '" + path  + "'";
                 stmt.executeUpdate(sql1);
+                System.out.println("#dataBase deleted");
 
             } catch (SQLException e) {
                 e.printStackTrace();

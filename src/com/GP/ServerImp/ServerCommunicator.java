@@ -187,7 +187,7 @@ public class ServerCommunicator implements IServerCommunicator{
             if(!isInDb){
                 return false;
             }
-         //   lock.lockReadFile(path);
+            lock.lockReadFile(path);
             if (jdbc.isInDB(path)) {
                 //lock writer
                 File file = new File(path);
@@ -213,7 +213,7 @@ public class ServerCommunicator implements IServerCommunicator{
                 System.out.println("upload finished");
                 sendTrueForOK();
                 fis.close();
-               // lock.unlockReadFile(path);
+                lock.unlockReadFile(path);
                 //unlock writer
                 return true;
             }

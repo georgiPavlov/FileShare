@@ -15,22 +15,20 @@ public class LockEntry {
 
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LockEntry lockEntry = (LockEntry) o;
+        LockEntry entry = (LockEntry) o;
 
-        if (!pathFile.equals(lockEntry.pathFile)) return false;
-        return countReadersOnCurrentFile.equals(lockEntry.countReadersOnCurrentFile);
+        return pathFile != null ? pathFile.equals(entry.pathFile) : entry.pathFile == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = pathFile.hashCode();
-        result = 31 * result + countReadersOnCurrentFile.hashCode();
-        return result;
+        return pathFile != null ? pathFile.hashCode() : 0;
     }
 }
