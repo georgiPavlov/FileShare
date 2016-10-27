@@ -16,14 +16,18 @@ public class ServerExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("waiting for connection");
         while(true){
             Socket socket=null;
             try {
+
                 socket = s.accept();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
             new Thread(new FileShareServer(socket)).start();
+
         }
     }
 }

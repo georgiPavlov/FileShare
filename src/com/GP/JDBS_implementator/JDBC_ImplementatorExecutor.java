@@ -19,9 +19,10 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
         boolean isAdminBool   = false;
         try {
             stmt = (Statement) conn.createStatement();
-            String sql1 = "select isAdmin from registration where user=" + user ;
+            System.out.println("db user " + user);
+            String sql1 = "select is_admin from registrations where user = '" + user + "'";
             ResultSet rs = (ResultSet) stmt.executeQuery(sql1);
-            //rs.next();
+            rs.next();
             isAdminBool = rs.getBoolean("is_admin");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,21 +55,26 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
 
     @Override
     public boolean commitToDB(String category, String path , String name) {
-        if(isInDB(path) && isAdmin(name)){
-
+        if(isAdmin(name)){
+            System.out.println("starting #dataBase commit");
+            System.out.println(category + "#" + path + "#" + name);
             Statement stmt ;
             try {
                 stmt = (Statement) conn.createStatement();
                 if(categoryExists(category)){
-                    String sql = "INSERT INTO categories " +
-                         "VALUES ("+ category +", 'basic description')";
+                    System.out.println("category does not exist");
+                    String sql = "INSERT INTO categories ( `name`, quick_introduction) " +
+                         "VALUES ('"+ category +"', 'basic description')";
                     stmt.executeUpdate(sql);
                 }
-                String sqlIndex = "select * from categories where name="+ category  ;
+                String sqlIndex = "select * from categories where name = '"+ category + "'" ;
+
                 ResultSet rs = (ResultSet) stmt.executeQuery(sqlIndex);
+                rs.next();
                 int index = rs.getInt("id");
-                        String sql1 = "INSERT INTO files " +
-                                "VALUES ("+ path +", " + index + ")";
+                System.out.println("category index #dataBase  + inserting file: " + index);
+                        String sql1 = "INSERT INTO files ( `path`, `categoriesID` ) " +
+                                "VALUES ('"+ path +"', '" + index + "')";
                 stmt.executeUpdate(sql1);
 
             } catch (SQLException e) {
@@ -84,7 +90,7 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
         Statement stmt ;
         try {
             stmt = (Statement) conn.createStatement();
-            String sql = "select * from registrations where name = "+ user + " AND password= "+ password ;
+            String sql = "select * from registrations where  user = '"+ user + "' AND password= '"+ password + "'" ;
             ResultSet rs = (ResultSet) stmt.executeQuery(sql);
             if (!rs.isBeforeFirst() ) {
                 return false;
@@ -103,7 +109,7 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
         Statement stmt ;
         try {
             stmt = (Statement) conn.createStatement();
-            String sql1 = "select * from files WHERE  files.path = " + path ;
+            String sql1 = "select * from files WHERE  files.path = '" + path + "'" ;
             ResultSet rs = (ResultSet) stmt.executeQuery(sql1);
             if (!rs.isBeforeFirst() ) {
                 return false;
@@ -124,7 +130,7 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
             try {
                 stmt = (Statement) conn.createStatement();
                 String sql1 = "DELETE FROM files " +
-                        "WHERE path = " + path ;
+                        "WHERE path = '" + path  + "'";
                 stmt.executeUpdate(sql1);
 
             } catch (SQLException e) {
@@ -141,7 +147,7 @@ public class JDBC_ImplementatorExecutor extends JDBC_Connection implements IJDBC
         Statement stmt ;
         try {
             stmt = (Statement) conn.createStatement();
-            String sql1 = "select * from categories WHERE  categories.name = " + category ;
+            String sql1 = "select * from categories WHERE  categories.name = '" + category + "'";
             ResultSet rs = (ResultSet) stmt.executeQuery(sql1);
             if (!rs.isBeforeFirst() ) {
                 return false;

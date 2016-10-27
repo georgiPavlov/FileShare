@@ -39,7 +39,7 @@ public class FileShareServer implements Runnable {
     @Override
     public void run() {
         System.out.println("start");
-        ServerCommunicator com = new ServerCommunicator(out,in);
+        ServerCommunicator com = new ServerCommunicator(out,in );
         try {
             com.startCommucateWithConsumer();
         } catch (IOException e) {

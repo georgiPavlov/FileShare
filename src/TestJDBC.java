@@ -26,15 +26,11 @@ public class TestJDBC {
             System.out.println("conn ready");
             Statement stmt = null;
             stmt = (Statement) c.createStatement();
-            String sql1 = "select * from categories;";
+            //String sql1 = "select * from categories;";
+            String sql1 = "select * from registrations where user  = 'basicUser' " ;
             com.mysql.jdbc.ResultSet rs = (ResultSet) stmt.executeQuery(sql1);
-            System.out.println(rs.toString());
-            while (rs.next()) {
-                String coffeeName = rs.getString("name");
-                String supplierID = rs.getString("quick_introduction");
-
-                System.out.println(coffeeName + "\t" + supplierID );
-            }
+            rs.next();
+            System.out.println(rs.getBoolean("is_admin"));
 
 
         } catch (SQLException e) {

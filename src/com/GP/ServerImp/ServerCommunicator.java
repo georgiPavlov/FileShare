@@ -7,6 +7,7 @@ import com.GP.MultithreadImplementation.ThreadLock;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,12 +29,17 @@ public class ServerCommunicator implements IServerCommunicator{
     private String USER;
     private   String PASSWORD;
     private IThreadLock lock;
+    private static final int  SIZE = 1000;
 
-    public ServerCommunicator(DataOutputStream out, DataInputStream in) {
+
+    public ServerCommunicator(DataOutputStream out, DataInputStream in ) {
         this.out = out;
         this.in = in;
         this.jdbc = new JDBC_ImplementatorExecutor();
         this.lock = new ThreadLock();
+        jdbc.createConnection();
+
+
     }
 
     public void  startCommucateWithConsumer() throws IOException  {
@@ -60,12 +66,15 @@ public class ServerCommunicator implements IServerCommunicator{
             out.write(b, 0, count);
         }
         System.out.println("upload finished");*/
+
     }
 
     private void requestMenu() {
         int request = 0;
         try {
+
             request = in.readInt();
+            System.out.println(request + "current request");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,12 +139,10 @@ public class ServerCommunicator implements IServerCommunicator{
     public boolean commitFromAdmin() { // String path , file data!
         if(isLoginSuccessful && isAdmin){
             //custom lock
-
             try {
                 String textPath = in.readUTF();
                 String category = in.readUTF();
-                lock.lockWriteFile(textPath);
-
+              //  lock.lockWriteFile(textPath);
                 File file = new File(textPath);
                 FileOutputStream fos = null;
                 try {
@@ -146,24 +153,25 @@ public class ServerCommunicator implements IServerCommunicator{
                 LOGGER.log(Level.FINE, "waiting for file");
                 System.out.println("Waiting for File");
                 int count = 0;
-                byte[] b = new byte[1000];
+                byte[] b = new byte[SIZE];
+                long fileCount = in.readLong();
                 System.out.println("Incoming File");
-                while((count = in.read(b)) != -1){
+                for(int i = 0; i < fileCount ; i++){
                     fos.write(b, 0, count);
                 }
                 LOGGER.log(Level.FINE, "file is written");
                 sendTrueForOK();
                 fos.close();
+                if(!jdbc.isInDB(textPath)){
                 jdbc.commitToDB(category , textPath ,USER );
+                }
                 System.out.println("fos closed");
-                lock.unlockWriteFile(textPath);
+                //lock.unlockWriteFile(textPath);
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             //custom unlock
-
         }
         sendFalseForNOT_OK();
         return false;
@@ -172,13 +180,16 @@ public class ServerCommunicator implements IServerCommunicator{
     @Override
     public boolean sendFileToClient() {
         String path = null;
-
         try {
             path = in.readUTF();
-            lock.lockReadFile(path);
+            boolean isInDb = jdbc.isInDB(path);
+            out.writeBoolean(isInDb);
+            if(!isInDb){
+                return false;
+            }
+         //   lock.lockReadFile(path);
             if (jdbc.isInDB(path)) {
                 //lock writer
-
                 File file = new File(path);
                 FileInputStream fis = null;
                 try {
@@ -187,20 +198,22 @@ public class ServerCommunicator implements IServerCommunicator{
                     e.printStackTrace();
                     return false;
                 }
-                out.writeUTF(file.getName());
+               // out.writeUTF(file.getName());
                 int count = 0;
-                byte[] b = new byte[1000];
+                byte[] b = new byte[SIZE];
                 LOGGER.log(Level.FINE, "uploading");
                 System.out.println("Uploading File...");
-
+                out.writeLong(getFileLoops(file));
                 while ((count = fis.read(b)) != -1) {
                     out.write(b, 0, count);
                 }
+                String string = "upload finished";
+                byte[] bytes = string.getBytes();
                 LOGGER.log(Level.FINE, "upload finished");
                 System.out.println("upload finished");
                 sendTrueForOK();
                 fis.close();
-                lock.unlockReadFile(path);
+               // lock.unlockReadFile(path);
                 //unlock writer
                 return true;
             }
@@ -256,6 +269,11 @@ public class ServerCommunicator implements IServerCommunicator{
             sendFalseForNOT_OK();
             return;
         }else {
+            try {
+                out.writeInt(entries.size());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             for (int i = 0; i < entries.size(); i++) {
                 try {
                     out.writeUTF(entries.get(i).getCategorie());
@@ -293,5 +311,26 @@ public class ServerCommunicator implements IServerCommunicator{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    byte[] toBytes(int i)
+    {
+        byte[] result = new byte[4];
+
+        result[0] = (byte) (i >> 24);
+        result[1] = (byte) (i >> 16);
+        result[2] = (byte) (i >> 8);
+        result[3] = (byte) (i /*>> 0*/);
+
+        return result;
+    }
+
+    private long getFileLoops(File file){
+        long fileSize = file.length();
+        long loopCount = fileSize / SIZE;
+        if(fileSize % SIZE != 0){
+            loopCount++;
+        }
+        return loopCount;
     }
 }

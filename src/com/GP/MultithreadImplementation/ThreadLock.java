@@ -47,21 +47,25 @@ public class ThreadLock implements IThreadLock {
 
                LockEntry entry = new LockEntry(path);
                if(!Ram_DB.classesThatAreCurrentlyInReadState.contains(entry)){
+                   System.out.println("adding to lockentry");
                    Ram_DB.classesThatAreCurrentlyInReadState.add(entry);
                }
+
+               System.out.println("incrementing entry with index" +
+                       " " + Ram_DB.classesThatAreCurrentlyInReadState.indexOf(entry));
 
                Ram_DB.classesThatAreCurrentlyInReadState.
                        get(Ram_DB.classesThatAreCurrentlyInReadState.indexOf(entry)).
                        countReadersOnCurrentFile.incrementAndGet();
 
-
-
-
     }
 
     @Override
     public void unlockReadFile(String path) {
+        System.out.println(path);
         LockEntry entry = new LockEntry(path);
+        System.out.println("entry index :"  + Ram_DB.classesThatAreCurrentlyInReadState.indexOf(entry));
+
         if(Ram_DB.classesThatAreCurrentlyInReadState.
                 get(Ram_DB.classesThatAreCurrentlyInReadState.indexOf(entry)).
                 countReadersOnCurrentFile.decrementAndGet() == 0){
