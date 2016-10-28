@@ -125,9 +125,11 @@ public class ServerCommunicator implements IServerCommunicator{
         }
         if(isLoginOK){
             sendTrueForOK();
+            isAdmin = jdbc.isAdmin(user);
             sendToClientIfIsAdmin();
             sendEntriesToClientAPP();
-            isAdmin = jdbc.isAdmin(user);
+
+
         }else {
             sendFalseForNOT_OK();
         }
@@ -160,7 +162,7 @@ public class ServerCommunicator implements IServerCommunicator{
                     fos.write(b, 0, count);
                 }
                 LOGGER.log(Level.FINE, "file is written");
-                sendTrueForOK();
+               // sendTrueForOK();
                 fos.close();
                 if(!jdbc.isInDB(textPath)){
                 jdbc.commitToDB(category , textPath ,USER );
@@ -252,7 +254,7 @@ public class ServerCommunicator implements IServerCommunicator{
             e.printStackTrace();
         }
         LOGGER.log(Level.FINE , "the file with path: " + textPath +  " is deleted");
-            sendTrueForOK();
+          //  sendTrueForOK();
             return true;
         }
         //unlock
