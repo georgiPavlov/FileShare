@@ -209,9 +209,9 @@ public class ServerCommunicator implements IServerCommunicator{
                 }
                 String string = "upload finished";
                 byte[] bytes = string.getBytes();
-                LOGGER.log(Level.FINE, "upload finished");
+               // LOGGER.log(Level.FINE, "upload finished");
                 System.out.println("upload finished");
-                sendTrueForOK();
+                //sendTrueForOK();
                 fis.close();
                 lock.unlockReadFile(path);
                 //unlock writer
