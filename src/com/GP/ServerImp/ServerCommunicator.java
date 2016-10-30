@@ -254,7 +254,7 @@ public class ServerCommunicator implements IServerCommunicator{
             e.printStackTrace();
         }
         LOGGER.log(Level.FINE , "the file with path: " + textPath +  " is deleted");
-          //  sendTrueForOK();
+            sendTrueForOK();
             return true;
         }
         //unlock
