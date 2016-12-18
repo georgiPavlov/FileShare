@@ -144,7 +144,8 @@ public class ServerCommunicator implements IServerCommunicator{
             try {
                 String textPath = in.readUTF();
                 String category = in.readUTF();
-              //  lock.lockWriteFile(textPath);
+
+                lock.lockWriteFile(textPath);
                 File file = new File(textPath);
                 FileOutputStream fos = null;
                 try {
@@ -157,8 +158,10 @@ public class ServerCommunicator implements IServerCommunicator{
                 int count = 0;
                 byte[] b = new byte[SIZE];
                 long fileCount = in.readLong();
+                System.out.println("loops " + fileCount);
                 System.out.println("Incoming File");
                 for(int i = 0; i < fileCount ; i++){
+                    in.read(b);
                     fos.write(b, 0, count);
                 }
                 LOGGER.log(Level.FINE, "file is written");
@@ -168,12 +171,15 @@ public class ServerCommunicator implements IServerCommunicator{
                 jdbc.commitToDB(category , textPath ,USER );
                 }
                 System.out.println("fos closed");
-                //lock.unlockWriteFile(textPath);
+                lock.unlockWriteFile(textPath);
+                return true;
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
             //custom unlock
+        }else {
+            System.out.println("some err");
         }
         sendFalseForNOT_OK();
         return false;
